@@ -1,8 +1,10 @@
 import { RegistryDates } from 'common/embedded/registry-dates.embedded';
+import { Order } from 'order/entities/order.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -28,4 +30,7 @@ export class User {
     prefix: false,
   })
   registryDates: RegistryDates;
+
+  @OneToMany(() => Order, (order) => order.customer)
+  orders: Order[];
 }
