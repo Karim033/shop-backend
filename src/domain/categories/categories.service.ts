@@ -1,27 +1,66 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  Query,
+} from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Repository } from 'typeorm';
+import { Category } from './entities/category.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'common/dto/pagination.dto';
+import { DEFAULT_PAGE_SIZE } from 'common/util/common.constant';
 
 @Injectable()
 export class CategoriesService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  constructor(
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
+  ) {}
+
+  create(createcategoryDto: CreateCategoryDto) {
+    const category = this.categoryRepository.create(createcategoryDto);
+    return this.categoryRepository.save(category);
   }
 
-  findAll(paginationDto: PaginationDto) {
-    return `This action returns all categories`;
+  findAll(@Query() paginationDto: PaginationDto) {
+    const { limit, offset } = paginationDto;
+    return this.categoryRepository.find({
+      skip: offset,
+      take: limit ?? DEFAULT_PAGE_SIZE.CATEGORY,
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: number) {
+    const category = await this.categoryRepository.findOne({
+      where: { id },
+      relations: {
+        products: true,
+      },
+    });
+    if (!category) {
+      throw new NotFoundException(`category not found with id: ${id}`);
+    }
+    return category;
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: number, updatecategoryDto: UpdateCategoryDto) {
+    const category = await this.categoryRepository.preload({
+      id,
+      ...updatecategoryDto,
+    });
+    if (!category) {
+      throw new NotFoundException(`category not found with id: ${id}`);
+    }
+    return this.categoryRepository.save(category);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: number) {
+    const category = await this.findOne(id);
+    if (category.products.length) {
+      throw new ConflictException('Category has related products');
+    }
+    return this.categoryRepository.remove(category);
   }
 }
