@@ -8,15 +8,14 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { OrderService } from './order.service';
+import { OrdersService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 import { IdDto } from 'common/dto/id.dto';
 import { PaginationDto } from 'common/dto/pagination.dto';
 
-@Controller('order')
+@Controller('orders')
 export class OrderController {
-  constructor(private readonly orderService: OrderService) {}
+  constructor(private readonly orderService: OrdersService) {}
 
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
@@ -31,11 +30,6 @@ export class OrderController {
   @Get(':id')
   findOne(@Param() { id }: IdDto) {
     return this.orderService.findOne(id);
-  }
-
-  @Patch(':id')
-  update(@Param() { id }: IdDto, @Body() updateOrderDto: UpdateOrderDto) {
-    return this.orderService.update(id, updateOrderDto);
   }
 
   @Delete(':id')
