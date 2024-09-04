@@ -1,4 +1,10 @@
-import { IsEmail, IsPhoneNumber, IsString, Length } from 'class-validator';
+import {
+  IsEmail,
+  IsPhoneNumber,
+  IsString,
+  Length,
+  Matches,
+} from 'class-validator';
 
 export class CreateUserDto {
   @Length(2, 50)
@@ -7,6 +13,8 @@ export class CreateUserDto {
   readonly email: string;
   @IsPhoneNumber('EG')
   readonly phone: string;
-  @IsString()
+  @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[a-zA-Z\d@$!%*?&]{8,20}$/,
+  )
   readonly password: string;
 }
