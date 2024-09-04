@@ -31,6 +31,12 @@ export class User {
   })
   registryDates: RegistryDates;
 
-  @OneToMany(() => Order, (order) => order.customer)
+  get isDeleted() {
+    return !!this.registryDates.deletatedAt;
+  }
+
+  @OneToMany(() => Order, (order) => order.customer, {
+    cascade: ['soft-remove', 'recover'],
+  })
   orders: Order[];
 }
