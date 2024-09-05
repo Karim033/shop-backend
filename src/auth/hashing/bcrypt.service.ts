@@ -9,6 +9,6 @@ export class BcryptService implements HashingService {
   }
 
   compare(data: string | Buffer, encrypted: string): Promise<boolean> {
-    return this.compare(data, encrypted);
+    return bcrypt.compare(data, encrypted);
   }
 }
