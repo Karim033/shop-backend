@@ -11,23 +11,15 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'common/dto/pagination.dto';
 import { DEFAULT_PAGE_SIZE } from 'common/util/common.constant';
-import * as bcrypt from 'bcrypt';
-import { HashingService } from 'auth/hashing/hashing.service';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly hashingService: HashingService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const { password } = createUserDto;
-    const hashPassword = await this.hashingService.hash(password);
-    const user = this.userRepository.create({
-      ...createUserDto,
-      password: hashPassword,
-    });
+    const user = this.userRepository.create(createUserDto);
     return this.userRepository.save(user);
   }
 
@@ -56,13 +48,7 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const { password } = updateUserDto;
-    const hashPassword = password && (await this.hashingService.hash(password));
-    const user = await this.userRepository.preload({
-      id,
-      ...updateUserDto,
-      password: hashPassword,
-    });
+    const user = await this.userRepository.preload({ id, ...updateUserDto });
     if (!user) {
       throw new NotFoundException(`User not found with id: ${id}`);
     }
