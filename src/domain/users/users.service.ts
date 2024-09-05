@@ -11,7 +11,7 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'common/dto/pagination.dto';
 import { DEFAULT_PAGE_SIZE } from 'common/util/common.constant';
-
+import * as bcrypt from 'bcrypt';
 @Injectable()
 export class UsersService {
   constructor(
@@ -19,8 +19,13 @@ export class UsersService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    const user = this.userRepository.create(createUserDto);
+  async create(createUserDto: CreateUserDto) {
+    const { password } = createUserDto;
+    const hashPassword = await this.hashPassword(password);
+    const user = this.userRepository.create({
+      ...createUserDto,
+      password: hashPassword,
+    });
     return this.userRepository.save(user);
   }
 
@@ -49,7 +54,13 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.userRepository.preload({ id, ...updateUserDto });
+    const { password } = updateUserDto;
+    const hashPassword = password && (await this.hashPassword(password));
+    const user = await this.userRepository.preload({
+      id,
+      ...updateUserDto,
+      password: hashPassword,
+    });
     if (!user) {
       throw new NotFoundException(`User not found with id: ${id}`);
     }
@@ -81,5 +92,10 @@ export class UsersService {
       throw new ConflictException(`User not Deleted`);
     }
     return this.userRepository.recover(user);
+  }
+
+  private async hashPassword(password: string) {
+    const salt = await bcrypt.genSalt();
+    return bcrypt.hash(password, salt);
   }
 }
