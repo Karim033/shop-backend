@@ -19,6 +19,7 @@ import { ROLES } from 'auth/decorators/roles.decorator';
 import { Role } from 'auth/roles/enums/role.enum';
 import { User } from 'auth/decorators/user.decorator';
 import { RequestUser } from 'auth/interfaces/request-user.interface';
+import { LoginDto } from 'auth/dto/login.dto';
 
 @Controller('users')
 export class UsersController {
@@ -40,6 +41,11 @@ export class UsersController {
   findOne(@Param() { id }: IdDto) {
     return this.usersService.findOne(id);
   }
+  @Public()
+  @Patch('recover')
+  recover(@Body() loginDto: LoginDto) {
+    return this.usersService.recover(loginDto);
+  }
 
   @Patch(':id')
   update(
@@ -57,10 +63,5 @@ export class UsersController {
     @User() user: RequestUser,
   ) {
     return this.usersService.remove(id, soft, user);
-  }
-
-  @Patch(':id/recover')
-  recover(@Param() { id }: IdDto, @User() user: RequestUser) {
-    return this.usersService.recover(id, user);
   }
 }

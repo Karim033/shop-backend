@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
   Query,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -15,11 +16,14 @@ import { DEFAULT_PAGE_SIZE } from 'common/util/common.constant';
 import { RequestUser } from 'auth/interfaces/request-user.interface';
 import { compareUserId } from 'auth/util/authorization.util';
 import { Role } from 'auth/roles/enums/role.enum';
+import { LoginDto } from 'auth/dto/login.dto';
+import { HashingService } from 'auth/hashing/hashing.service';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly hashingService: HashingService,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -79,12 +83,10 @@ export class UsersService {
       : this.userRepository.remove(user);
   }
 
-  async recover(id: number, currentUser: RequestUser) {
-    if (currentUser.role !== Role.ADMIN) {
-      compareUserId(currentUser.id, id);
-    }
+  async recover(loginDto: LoginDto) {
+    const { email, password } = loginDto;
     const user = await this.userRepository.findOne({
-      where: { id },
+      where: { email },
       relations: {
         orders: {
           items: true,
@@ -94,10 +96,14 @@ export class UsersService {
       withDeleted: true,
     });
     if (!user) {
-      throw new NotFoundException(`User not found with id: ${id}`);
+      throw new UnauthorizedException('Invalid email');
+    }
+    const isMatch = await this.hashingService.compare(password, user.password);
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid password');
     }
     if (!user.isDeleted) {
-      throw new ConflictException(`User not Deleted`);
+      throw new ConflictException('User not deleted');
     }
     return this.userRepository.recover(user);
   }
