@@ -18,6 +18,8 @@ import { Response } from 'express';
 import { Public } from './decorators/public.decorator';
 import { IdDto } from 'common/dto/id.dto';
 import { RoleDto } from './roles/dto/role.dto';
+import { ROLES } from './decorators/roles.decorator';
+import { Role } from './roles/enums/role.enum';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -46,6 +48,7 @@ export class AuthController {
     return this.authService.getProfile(id);
   }
 
+  @ROLES(Role.ADMIN)
   @Patch(':id/assign-role')
   assignRole(@Param() { id }: IdDto, @Body() { role }: RoleDto) {
     return this.authService.assignRole(id, role);
