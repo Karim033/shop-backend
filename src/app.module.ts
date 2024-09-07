@@ -10,6 +10,16 @@ import { ProductsModule } from './domain/products/products.module';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [UsersModule, CommonModule, DatabaseModule, EnvModule, OrderModule, PaymentsModule, CategoriesModule, ProductsModule, AuthModule],
+  imports: [
+    UsersModule,
+    CommonModule,
+    DatabaseModule,
+    EnvModule,
+    OrderModule,
+    PaymentsModule,
+    CategoriesModule,
+    ProductsModule,
+    AuthModule,
+  ],
 })
 export class AppModule {}
