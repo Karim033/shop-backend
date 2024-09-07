@@ -1,5 +1,6 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   Query,
@@ -11,6 +12,9 @@ import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'common/dto/pagination.dto';
 import { DEFAULT_PAGE_SIZE } from 'common/util/common.constant';
+import { RequestUser } from 'auth/interfaces/request-user.interface';
+import { compareUserId } from 'auth/util/authorization.util';
+import { Role } from 'auth/roles/enums/role.enum';
 @Injectable()
 export class UsersService {
   constructor(
@@ -47,7 +51,14 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    currentUser: RequestUser,
+  ) {
+    if (currentUser.role !== Role.ADMIN) {
+      compareUserId(currentUser.id, id);
+    }
     const user = await this.userRepository.preload({ id, ...updateUserDto });
     if (!user) {
       throw new NotFoundException(`User not found with id: ${id}`);
@@ -55,14 +66,23 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
-  async remove(id: number, soft: Boolean) {
+  async remove(id: number, soft: Boolean, currentUser: RequestUser) {
+    if (currentUser.role !== Role.ADMIN) {
+      compareUserId(currentUser.id, id);
+      if (!soft) {
+        throw new ForbiddenException('Forbidden resource');
+      }
+    }
     const user = await this.findOne(id);
     return soft
       ? this.userRepository.softRemove(user)
       : this.userRepository.remove(user);
   }
 
-  async recover(id: number) {
+  async recover(id: number, currentUser: RequestUser) {
+    if (currentUser.role !== Role.ADMIN) {
+      compareUserId(currentUser.id, id);
+    }
     const user = await this.userRepository.findOne({
       where: { id },
       relations: {

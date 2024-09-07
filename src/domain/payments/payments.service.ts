@@ -4,6 +4,9 @@ import { Order } from 'order/entities/order.entity';
 import { Repository } from 'typeorm';
 import { Payment } from './entities/payment.entity';
 import { OrderStatus } from 'order/enums/order-status.enum';
+import { RequestUser } from 'auth/interfaces/request-user.interface';
+import { Role } from 'auth/roles/enums/role.enum';
+import { compareUserId } from 'auth/util/authorization.util';
 
 @Injectable()
 export class PaymentsService {
@@ -13,15 +16,19 @@ export class PaymentsService {
     @InjectRepository(Payment)
     private readonly paymentRepository: Repository<Payment>,
   ) {}
-  async payOrder(id: number) {
+  async payOrder(id: number, currentUser: RequestUser) {
     const order = await this.orderRepository.findOne({
       where: { id },
       relations: {
         payment: true,
+        customer: true,
       },
     });
     if (!order) {
       throw new NotFoundException(`order not found with id: ${id}`);
+    }
+    if (currentUser.role !== Role.ADMIN) {
+      compareUserId(currentUser.id, order.customer.id);
     }
     if (order.payment) {
       throw new NotFoundException(`order already paid with id: ${id}`);
