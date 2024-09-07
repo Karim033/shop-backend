@@ -1,8 +1,11 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
   Post,
   Res,
   UseGuards,
@@ -12,8 +15,9 @@ import { LocalAuthGuard } from './guards/local-auth/local-auth.guard';
 import { User } from './decorators/user.decorator';
 import { RequestUser } from './interfaces/request-user.interface';
 import { Response } from 'express';
-import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { Public } from './decorators/public.decorator';
+import { IdDto } from 'common/dto/id.dto';
+import { RoleDto } from './roles/dto/role.dto';
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -40,5 +44,10 @@ export class AuthController {
   @Get('profile')
   getProfile(@User() { id }: RequestUser) {
     return this.authService.getProfile(id);
+  }
+
+  @Patch(':id/assign-role')
+  assignRole(@Param() { id }: IdDto, @Body() { role }: RoleDto) {
+    return this.authService.assignRole(id, role);
   }
 }
