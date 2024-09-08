@@ -28,16 +28,12 @@ export class ProductsService {
   }
 
   async findOne(id: number) {
-    const product = await this.productRepository.findOne({
+    return this.productRepository.findOneOrFail({
       where: { id },
       relations: {
         categories: true,
       },
     });
-    if (!product) {
-      throw new NotFoundException(`product not found with id: ${id}`);
-    }
-    return product;
   }
 
   async update(id: number, updateproductDto: UpdateProductDto) {

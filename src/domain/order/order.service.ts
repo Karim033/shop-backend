@@ -43,7 +43,7 @@ export class OrdersService {
   }
 
   async findOne(id: number) {
-    const order = await this.orderRepository.findOne({
+    return this.orderRepository.findOneOrFail({
       where: { id },
       relations: {
         items: {
@@ -53,10 +53,6 @@ export class OrdersService {
         payment: true,
       },
     });
-    if (!order) {
-      throw new NotFoundException(`order not found with id: ${id}`);
-    }
-    return order;
   }
 
   async remove(id: number) {
@@ -66,11 +62,8 @@ export class OrdersService {
 
   private async createOrderItemWithPrice(orderItemDto: OrderITemDto) {
     const { id } = orderItemDto.product;
-    const product = await this.productRepository.findOneBy({ id });
-    if (!product) {
-      throw new NotFoundException(`product not found with id: ${id}`);
-    }
-    const { price } = product;
+    const { price } = await this.productRepository.findOneByOrFail({ id });
+
     const orderItem = this.orderItemRepository.create({
       ...orderItemDto,
       price,
