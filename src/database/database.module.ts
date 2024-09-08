@@ -4,6 +4,7 @@ import { SeedingModule } from './seeding/seeding.module';
 import databaseConfig from './config/database.config';
 import { APP_FILTER } from '@nestjs/core';
 import { NotFoundExceptionFilter } from './exception-filters/not-found-exception/not-found-exception.filter';
+import { DatabaseExceptionFilter } from './exception-filters/database-exception/database-exception.filter';
 
 @Module({
   imports: [
@@ -14,6 +15,10 @@ import { NotFoundExceptionFilter } from './exception-filters/not-found-exception
     {
       provide: APP_FILTER,
       useClass: NotFoundExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: DatabaseExceptionFilter,
     },
   ],
 })
