@@ -7,7 +7,7 @@ import {
 import { StorageService } from './storage.service';
 import { join } from 'path';
 import { BASE_PATH } from 'files/util/file.constants';
-import { mkdir, pathExists, readdir, remove, writeFile } from 'fs-extra';
+import { mkdirp, pathExists, readdir, remove, writeFile } from 'fs-extra';
 import { createReadStream } from 'fs';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class FseService implements StorageService {
   }
   async createDir(path: string) {
     const fullPath = join(BASE_PATH, path);
-    await mkdir(fullPath);
+    await mkdirp(fullPath);
   }
   getFile(path: string) {
     const fullPath = join(BASE_PATH, path);
