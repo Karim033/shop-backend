@@ -24,6 +24,8 @@ import { Role } from 'auth/roles/enums/role.enum';
 import { ApiTags } from '@nestjs/swagger';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { createFileValidators } from 'files/util/file-validation';
+import { IdDto } from 'common/dto/id.dto';
+import { IdFilenameDto } from 'files/dto/filename/id-filename.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -58,9 +60,11 @@ export class ProductsController {
     return this.productsService.remove(+id);
   }
 
+  @ROLES(Role.MANAGER)
   @UseInterceptors(FilesInterceptor('files', 5))
   @Post(':id/images')
   uploadImages(
+    @Param() { id }: IdDto,
     @UploadedFiles(
       new ParseFilePipe({
         validators: createFileValidators('2MB', 'jpeg', 'png'),
@@ -68,6 +72,18 @@ export class ProductsController {
     )
     files: Express.Multer.File[],
   ) {
-    return files;
+    return this.productsService.uploadImages(id, files);
+  }
+
+  @Public()
+  @Get(':id/images/:filename')
+  downloadImage(@Param() { id, filename }: IdFilenameDto) {
+    return this.productsService.downloadImage(id, filename);
+  }
+
+  @ROLES(Role.MANAGER)
+  @Delete(':id/images/:filename')
+  deleteImage(@Param() { id, filename }: IdFilenameDto) {
+    return this.productsService.deleteImage(id, filename);
   }
 }
