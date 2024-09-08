@@ -9,4 +9,6 @@ export abstract class StorageService {
   abstract getDirFileCount(path: string): Promise<number>;
   abstract delete(path: string): Promise<void>;
   abstract validatePath(path: string): Promise<void>;
+  abstract validateFileCount(count: number, max: number): void;
+  abstract getUniqueFileName(fileName: string): string;
 }
