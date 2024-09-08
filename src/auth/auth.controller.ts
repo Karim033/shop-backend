@@ -20,12 +20,18 @@ import { IdDto } from 'common/dto/id.dto';
 import { RoleDto } from './roles/dto/role.dto';
 import { ROLES } from './decorators/roles.decorator';
 import { Role } from './roles/enums/role.enum';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
+import { LoginDto } from './dto/login.dto';
+import { JwtCookieHeader } from './swagger/jwt-cokkie.header';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiBody({ type: LoginDto })
+  @ApiOkResponse({
+    headers: JwtCookieHeader,
+  })
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Public()
@@ -35,14 +41,11 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const token = this.authService.login(user);
-    return {
-      token,
-    };
-    // response.cookie('token', token, {
-    //   secure: true,
-    //   httpOnly: true,
-    //   sameSite: true,
-    // });
+    response.cookie('token', token, {
+      secure: true,
+      httpOnly: true,
+      sameSite: true,
+    });
   }
 
   @Get('profile')
