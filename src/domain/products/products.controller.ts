@@ -68,7 +68,6 @@ export class ProductsController {
     )
     files: Express.Multer.File[],
   ) {
-    console.log(files);
     return files;
   }
 }
