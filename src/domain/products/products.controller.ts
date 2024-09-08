@@ -22,6 +22,7 @@ import { ROLES } from 'auth/decorators/roles.decorator';
 import { Role } from 'auth/roles/enums/role.enum';
 import { ApiTags } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { createFileValidators } from 'files/util/file-validation';
 
 @ApiTags('Products')
 @Controller('products')
@@ -61,10 +62,7 @@ export class ProductsController {
   uploadImage(
     @UploadedFile(
       new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 }),
-          new FileTypeValidator({ fileType: /png|jpeg/ }),
-        ],
+        validators: createFileValidators('2MB', 'jpeg', 'pdf', 'png'),
       }),
     )
     file: Express.Multer.File,
