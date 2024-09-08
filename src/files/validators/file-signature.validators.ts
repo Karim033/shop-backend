@@ -13,7 +13,6 @@ export class FileSignatureValidator extends FileValidator {
     if (!fileSignatures.length) return false;
     const isMatch = fileSignatures.includes(file.mimetype);
     if (!isMatch) return false;
-
     return true;
   }
 }
