@@ -7,6 +7,8 @@ import {
   Param,
   Delete,
   Query,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -16,6 +18,7 @@ import { Public } from 'auth/decorators/public.decorator';
 import { ROLES } from 'auth/decorators/roles.decorator';
 import { Role } from 'auth/roles/enums/role.enum';
 import { ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @ApiTags('Products')
 @Controller('products')
@@ -48,5 +51,11 @@ export class ProductsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productsService.remove(+id);
+  }
+
+  @UseInterceptors(FileInterceptor('file'))
+  @Post(':id/image')
+  uploadImage(@UploadedFile() file: Express.Multer.File) {
+    return file;
   }
 }

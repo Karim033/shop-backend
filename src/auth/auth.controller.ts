@@ -23,6 +23,7 @@ import { Role } from './roles/enums/role.enum';
 import { ApiBody, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { JwtCookieHeader } from './swagger/jwt-cokkie.header';
+import { ProfileSchema } from './swagger/profile.schema';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -48,11 +49,17 @@ export class AuthController {
     });
   }
 
+  @ApiOkResponse({
+    type: ProfileSchema,
+  })
   @Get('profile')
   getProfile(@User() { id }: RequestUser) {
     return this.authService.getProfile(id);
   }
 
+  @ApiOkResponse({
+    type: ProfileSchema,
+  })
   @ROLES(Role.ADMIN)
   @Patch(':id/assign-role')
   assignRole(@Param() { id }: IdDto, @Body() { role }: RoleDto) {
