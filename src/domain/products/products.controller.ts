@@ -29,9 +29,13 @@ import {
 } from 'files/util/file-validation';
 import { IdDto } from 'common/dto/id.dto';
 import { IdFilenameDto } from 'files/dto/filename/id-filename.dto';
-import { MULTIPART_FORMDATA_KEY } from 'files/util/file.constants';
+import {
+  MaxFileCount,
+  MULTIPART_FORMDATA_KEY,
+} from 'files/util/file.constants';
 import { FilesSchema } from 'files/swagger/schemas/files.schema';
 import { FileSchema } from 'files/swagger/schemas/file.schema';
+import { BodyInterceptor } from 'files/interceptors/body/body.interceptor';
 
 @ApiTags('Products')
 @Controller('products')
@@ -69,7 +73,10 @@ export class ProductsController {
   @ApiConsumes(MULTIPART_FORMDATA_KEY)
   @ApiBody({ type: FilesSchema })
   @ROLES(Role.MANAGER)
-  @UseInterceptors(FilesInterceptor('files', 5))
+  @UseInterceptors(
+    FilesInterceptor('files', MaxFileCount.PRODUCT_IMAGES),
+    BodyInterceptor,
+  )
   @Post(':id/images')
   uploadImages(
     @Param() { id }: IdDto,
