@@ -23,12 +23,13 @@ export class ProductsService {
     return this.productRepository.save(product);
   }
 
-  findAll(@Query() paginationDto: PaginationDto) {
+  async findAll(@Query() paginationDto: PaginationDto) {
     const { limit, offset } = paginationDto;
-    return this.productRepository.find({
+    const [data, count] = await this.productRepository.findAndCount({
       skip: offset,
       take: limit ?? DEFAULT_PAGE_SIZE.CATEGORY,
     });
+    return { data, count };
   }
 
   async findOne(id: number) {
