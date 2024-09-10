@@ -21,7 +21,7 @@ import { PaginationDto } from 'common/dto/pagination.dto';
 import { Public } from 'auth/decorators/public.decorator';
 import { ROLES } from 'auth/decorators/roles.decorator';
 import { Role } from 'auth/roles/enums/role.enum';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import {
   createFileValidators,
@@ -29,6 +29,9 @@ import {
 } from 'files/util/file-validation';
 import { IdDto } from 'common/dto/id.dto';
 import { IdFilenameDto } from 'files/dto/filename/id-filename.dto';
+import { MULTIPART_FORMDATA_KEY } from 'files/util/file.constants';
+import { FilesSchema } from 'files/swagger/schemas/files.schema';
+import { FileSchema } from 'files/swagger/schemas/file.schema';
 
 @ApiTags('Products')
 @Controller('products')
@@ -63,6 +66,8 @@ export class ProductsController {
     return this.productsService.remove(+id);
   }
 
+  @ApiConsumes(MULTIPART_FORMDATA_KEY)
+  @ApiBody({ type: FilesSchema })
   @ROLES(Role.MANAGER)
   @UseInterceptors(FilesInterceptor('files', 5))
   @Post(':id/images')
@@ -74,6 +79,7 @@ export class ProductsController {
     return this.productsService.uploadImages(id, files);
   }
 
+  @ApiOkResponse({ type: FileSchema })
   @Public()
   @Get(':id/images/:filename')
   downloadImage(@Param() { id, filename }: IdFilenameDto) {
