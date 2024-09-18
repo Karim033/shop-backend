@@ -36,6 +36,7 @@ import {
 import { FilesSchema } from 'files/swagger/schemas/files.schema';
 import { FileSchema } from 'files/swagger/schemas/file.schema';
 import { BodyInterceptor } from 'files/interceptors/body/body.interceptor';
+import { ProductsQueryDto } from './dto/quering/products-query.dto';
 
 @ApiTags('Products')
 @Controller('products')
@@ -49,8 +50,8 @@ export class ProductsController {
 
   @Public()
   @Get()
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.productsService.findAll(paginationDto);
+  findAll(@Query() productsQueryDto: ProductsQueryDto) {
+    return this.productsService.findAll(productsQueryDto);
   }
   @Public()
   @Get(':id')

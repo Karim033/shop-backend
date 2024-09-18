@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, Query } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'quering/dto/pagination.dto';
@@ -11,6 +11,7 @@ import { BASE_PATH, FilePath, MaxFileCount } from 'files/util/file.constants';
 import { join } from 'path';
 import { pathExists } from 'fs-extra';
 import { PaginationService } from 'quering/pagination.service';
+import { ProductsQueryDto } from './dto/quering/products-query.dto';
 
 @Injectable()
 export class ProductsService {
@@ -25,11 +26,19 @@ export class ProductsService {
     return this.productRepository.save(product);
   }
 
-  async findAll(@Query() paginationDto: PaginationDto) {
-    const { page } = paginationDto;
-    const limit = paginationDto.limit ?? DefaultPageSize.PRODUCT;
+  async findAll(@Query() productsQueryDto: ProductsQueryDto) {
+    const { page, name, price, categoryId, sort, order } = productsQueryDto;
+    const limit = productsQueryDto.limit ?? DefaultPageSize.PRODUCT;
     const offset = this.paginationService.calculateOffset(limit, page);
     const [data, count] = await this.productRepository.findAndCount({
+      where: {
+        name: name ? ILike(`%${name}%`) : undefined,
+        price,
+        categories: {
+          id: categoryId,
+        },
+      },
+      order: { [sort]: order },
       skip: offset,
       take: limit,
     });
