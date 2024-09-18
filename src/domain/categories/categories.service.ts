@@ -9,8 +9,8 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaginationDto } from 'common/dto/pagination.dto';
-import { DefaultPageSize } from 'common/util/common.constant';
+import { PaginationDto } from 'quering/dto/pagination.dto';
+import { DefaultPageSize } from 'quering/util/quering.constant';
 
 @Injectable()
 export class CategoriesService {
