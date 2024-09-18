@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'common/dto/pagination.dto';
-import { DEFAULT_PAGE_SIZE } from 'common/util/common.constant';
+import { DefaultPageSize } from 'common/util/common.constant';
 
 @Injectable()
 export class CategoriesService {
@@ -28,7 +28,7 @@ export class CategoriesService {
     const { limit, offset } = paginationDto;
     return this.categoryRepository.find({
       skip: offset,
-      take: limit ?? DEFAULT_PAGE_SIZE.CATEGORY,
+      take: limit ?? DefaultPageSize.CATEGORY,
     });
   }
 

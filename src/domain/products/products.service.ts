@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { Product } from './entities/product.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'common/dto/pagination.dto';
-import { DEFAULT_PAGE_SIZE } from 'common/util/common.constant';
+import { DefaultPageSize } from 'common/util/common.constant';
 import { StorageService } from 'files/storage/storage.service';
 import { BASE_PATH, FilePath, MaxFileCount } from 'files/util/file.constants';
 import { join } from 'path';
@@ -27,7 +27,7 @@ export class ProductsService {
     const { limit, offset } = paginationDto;
     const [data, count] = await this.productRepository.findAndCount({
       skip: offset,
-      take: limit ?? DEFAULT_PAGE_SIZE.CATEGORY,
+      take: limit ?? DefaultPageSize.CATEGORY,
     });
     return { data, count };
   }
