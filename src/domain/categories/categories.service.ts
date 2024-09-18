@@ -11,12 +11,14 @@ import { Category } from './entities/category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'quering/dto/pagination.dto';
 import { DefaultPageSize } from 'quering/util/quering.constant';
+import { PaginationService } from 'quering/pagination.service';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+    private readonly paginationService: PaginationService,
   ) {}
 
   create(createcategoryDto: CreateCategoryDto) {
@@ -24,12 +26,16 @@ export class CategoriesService {
     return this.categoryRepository.save(category);
   }
 
-  findAll(@Query() paginationDto: PaginationDto) {
-    const { limit, offset } = paginationDto;
-    return this.categoryRepository.find({
+  async findAll(@Query() paginationDto: PaginationDto) {
+    const { page } = paginationDto;
+    const limit = paginationDto.limit ?? DefaultPageSize.PRODUCT;
+    const offset = this.paginationService.calculateOffset(limit, page);
+    const [data, count] = await this.categoryRepository.findAndCount({
       skip: offset,
       take: limit ?? DefaultPageSize.CATEGORY,
     });
+    const meta = this.paginationService.createMeta(limit, page, count);
+    return { data, meta };
   }
 
   async findOne(id: number) {
