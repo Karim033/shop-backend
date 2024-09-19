@@ -12,6 +12,7 @@ import { join } from 'path';
 import { pathExists } from 'fs-extra';
 import { PaginationService } from 'quering/pagination.service';
 import { ProductsQueryDto } from './dto/quering/products-query.dto';
+import { FilteringService } from 'quering/filtering.service';
 
 @Injectable()
 export class ProductsService {
@@ -20,6 +21,7 @@ export class ProductsService {
     private readonly productRepository: Repository<Product>,
     private readonly storageService: StorageService,
     private readonly paginationService: PaginationService,
+    private readonly filteringService: FilteringService,
   ) {}
   create(createproductDto: CreateProductDto) {
     const product = this.productRepository.create(createproductDto);
@@ -32,7 +34,7 @@ export class ProductsService {
     const offset = this.paginationService.calculateOffset(limit, page);
     const [data, count] = await this.productRepository.findAndCount({
       where: {
-        name: name ? ILike(`%${name}%`) : undefined,
+        name: this.filteringService.contains(name),
         price,
         categories: {
           id: categoryId,
